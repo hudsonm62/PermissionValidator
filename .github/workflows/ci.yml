@@ -48,7 +48,7 @@ jobs:
         id: get-version
         shell: pwsh
         run: |
-          $Version = (Get-Content gradle.properties | Select-String '^mod.version =').ToString().Split('=')[1].Trim()
+          $Version = (Get-Content gradle.properties | Select-String '^mod\.version\s*=').ToString().Split('=')[1].Trim()
           echo "version=$Version" >> $env:GITHUB_OUTPUT
 
       - name: 🔍 Get Short SHA
