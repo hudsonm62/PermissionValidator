@@ -1,0 +1,20 @@
+modLoader = "kotlinforforge"
+loaderVersion = "[5.3,)"
+license = "Apache-2.0"
+
+[[mods]]
+modId = "${id}"
+version = "${version}"
+displayName = "${name}"
+displayURL = "https://modrinth.com/project/MgGi86RS"
+authors = "Hudson M."
+description = '''
+${description}
+'''
+
+[[dependencies.${id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "[${minecraftVersionVirtual},)"
+ordering = "NONE"
+side = "BOTH"

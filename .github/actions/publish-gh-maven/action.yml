@@ -1,0 +1,104 @@
+name: Publish mod to Maven
+
+description: Add built mod JARs, metadata, and checksums to the central GitHub Pages Maven repository.
+
+inputs:
+  repository:
+    description: Target repository owner/name
+    required: true
+  token:
+    description: Fine-grained PAT or GitHub App token with Contents write permission in the target repository
+    required: true
+  branch:
+    description: Branch where the repository stores src/
+    required: false
+    default: master
+  group-id:
+    description: Maven group ID
+    required: true
+  artifact-id:
+    description: Maven artifact ID
+    required: true
+  version:
+    description: Release version, without the leading v
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout Maven Repo
+      uses: actions/checkout@v7
+      with:
+        repository: ${{ inputs.repository }}
+        ref: ${{ inputs.branch }}
+        token: ${{ inputs.token }}
+        persist-credentials: true
+        path: .maven-publisher-checkout
+
+    - name: Publish via MVN
+      shell: pwsh
+      env:
+        GROUP: ${{ inputs.group-id }}
+        ARTIFACT: ${{ inputs.artifact-id }}
+        VERSION: ${{ inputs.version }}
+        TARGET_BRANCH: ${{ inputs.branch }}
+      run: |
+        $ErrorActionPreference = 'Stop'
+
+        $repo = Join-Path $env:GITHUB_WORKSPACE '.maven-publisher-checkout'
+        $mavenRepo = Join-Path $repo 'src'
+
+        $groupPath = $env:GROUP.Replace('.', '/')
+        $artifactDir = "$groupPath/$env:ARTIFACT"
+
+        New-Item -ItemType Directory -Force -Path $mavenRepo | Out-Null
+
+        $repoUri = [System.Uri]::new(
+          [System.IO.Path]::GetFullPath($mavenRepo)
+        ).AbsoluteUri
+
+        $files = Get-ChildItem -Path 'build/libs' -Filter '*.jar' -File
+
+        foreach ($file in $files) {
+          Write-Information "➖ Publishing $($file.Name)" -InformationAction Continue
+
+          $mvnArgs = @(
+            '-B'
+            'org.apache.maven.plugins:maven-deploy-plugin:3.2.0:deploy-file'
+            "-Dfile=$($file.FullName)"
+            "-DgroupId=$env:GROUP"
+            "-DartifactId=$env:ARTIFACT"
+            "-Dversion=$env:VERSION"
+            "-Dclassifier=$($file.BaseName)"
+            '-Dpackaging=jar'
+            '-DrepositoryId=local'
+            "-Durl=$repoUri"
+          )
+
+          & mvn @mvnArgs
+          if ($LASTEXITCODE -ne 0) {
+            throw "❌ Maven deploy failed with exit code $LASTEXITCODE"
+          }
+        }
+
+        # Stage all published artifacts.
+        git -C $repo add -f -A -- "src/$artifactDir"
+        if ($LASTEXITCODE -ne 0) {
+          throw "❌ Git add failed with exit code $LASTEXITCODE"
+        }
+
+        git -C $repo `
+          -c 'user.name=github-actions[bot]' `
+          -c 'user.email=41898282+github-actions[bot]@users.noreply.github.com' `
+          commit -m "Publish $env:GROUP`:$env:ARTIFACT`:$env:VERSION"
+
+        if ($LASTEXITCODE -ne 0) {
+          throw "❌ Git commit failed with exit code $LASTEXITCODE"
+        }
+
+        git -C $repo push origin "HEAD:$env:TARGET_BRANCH"
+        if ($LASTEXITCODE -ne 0) {
+          throw "❌ Git push failed with exit code $LASTEXITCODE"
+        }
+
+        Write-Information "`n`n✅ Successfully published $env:GROUP`:$env:ARTIFACT`:$env:VERSION" -InformationAction Continue
