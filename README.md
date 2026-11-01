@@ -27,23 +27,23 @@ repositories {
 
 // For Fabric
 dependencies {
-    modImplementation "com.ziroau:permissionvalidator-fabric:${permissionvalidator_version}+mc${minecraft_version}"
-    include "com.ziroau:permissionvalidator-fabric:${permissionvalidator_version}+mc${minecraft_version}"
+    modImplementation "com.ziroau:permissionvalidator:${permissionvalidator_version}:fabric-mc${minecraft_version}"
+    include "com.ziroau:permissionvalidator:${permissionvalidator_version}:fabric-mc${minecraft_version}"
 }
 
 // For NeoForge
 dependencies {
-    jarJar (implementation("com.ziroau:permissionvalidator-neoforge")) {
+    jarJar(implementation("com.ziroau:permissionvalidator:${permissionvalidator_version}:neoforge-mc${minecraft_version}")) {
         version {
-            strictly "[${permissionvalidator_version}+mc${minecraft_version},])"
-            prefer "${permissionvalidator_version}+mc${minecraft_version}"
+            strictly "[${permissionvalidator_version},)"
+            prefer "${permissionvalidator_version}"
         }
     }
 }
 
 // Multiloader 'Common' Project
 dependencies {
-    modCompileOnlyApi "com.ziroau:permissionvalidator-fabric:${permissionvalidator_version}+mc${minecraft_version}"
+    modCompileOnlyApi "com.ziroau:permissionvalidator:${permissionvalidator_version}:fabric-mc${minecraft_version}"
 }
 ```
 

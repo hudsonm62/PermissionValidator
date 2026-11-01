@@ -57,10 +57,30 @@ runs:
           [System.IO.Path]::GetFullPath($mavenRepo)
         ).AbsoluteUri
 
-        $files = Get-ChildItem -Path 'build/libs' -Filter '*.jar' -File
+        $files = @(Get-ChildItem -Path 'build/libs' -Filter '*.jar' -File)
+
+        if ($files.Count -eq 0) {
+          throw "❌ No JAR files found in build/libs"
+        }
+
+        # Match Fabric and NeoForge JARs for this artifact and version.
+        $pattern = '^' +
+          [regex]::Escape($env:ARTIFACT) +
+          '-(?<loader>fabric|neoforge)-' +
+          [regex]::Escape($env:VERSION) +
+          '\+mc(?<mc>[0-9][A-Za-z0-9._-]*)$'
+
+        $published = 0
 
         foreach ($file in $files) {
-          Write-Information "➖ Publishing $($file.Name)" -InformationAction Continue
+          if ($file.BaseName -notmatch $pattern) {
+            Write-Information "⏭️ Skipping $($file.Name)" -InformationAction Continue
+            continue
+          }
+
+          $classifier = "$($Matches.loader)-mc$($Matches.mc)"
+
+          Write-Information "➖ Publishing $($file.Name) as $classifier" -InformationAction Continue
 
           $mvnArgs = @(
             '-B'
@@ -69,7 +89,7 @@ runs:
             "-DgroupId=$env:GROUP"
             "-DartifactId=$env:ARTIFACT"
             "-Dversion=$env:VERSION"
-            "-Dclassifier=$($file.BaseName)"
+            "-Dclassifier=$classifier"
             '-Dpackaging=jar'
             '-DrepositoryId=local'
             "-Durl=$repoUri"
@@ -79,6 +99,12 @@ runs:
           if ($LASTEXITCODE -ne 0) {
             throw "❌ Maven deploy failed with exit code $LASTEXITCODE"
           }
+
+          $published++
+        }
+
+        if ($published -eq 0) {
+          throw "❌ No matching Fabric or NeoForge JARs were found"
         }
 
         # Stage all published artifacts.
@@ -101,4 +127,4 @@ runs:
           throw "❌ Git push failed with exit code $LASTEXITCODE"
         }
 
-        Write-Information "`n`n✅ Successfully published $env:GROUP`:$env:ARTIFACT`:$env:VERSION" -InformationAction Continue
+        Write-Information "`n✅ Successfully published $published JAR(s) for $env:GROUP`:$env:ARTIFACT`:$env:VERSION" -InformationAction Continue
