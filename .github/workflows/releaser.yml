@@ -23,7 +23,7 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     env:
       MODRINTH_ID: MgGi86RS
 
