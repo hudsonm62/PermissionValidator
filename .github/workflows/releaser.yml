@@ -68,8 +68,8 @@ jobs:
           validate-wrappers: true
           cache-provider: basic
 
-      - name: ⚙️ Make Gradlew and Release Script Executable
-        run: chmod +x ./gradlew ./scripts/release.sh
+      - name: ⚙️ Make Gradle Executable
+        run: chmod +x ./gradlew
 
       - name: 📦 Build & Publish to Modrinth
         env:
@@ -77,8 +77,7 @@ jobs:
           MODRINTH_ID: ${{ env.MODRINTH_ID }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
           RELEASE_TYPE: ${{ inputs.version-type }}
-        shell: sh
-        run: ./scripts/release.sh "${{ steps.get-version.outputs.version }}"
+        run: ./gradlew buildAndCollect publishMods --stacktrace
 
       - name: 📦 Publish to ziro maven
         uses: ./.github/actions/publish-gh-maven
