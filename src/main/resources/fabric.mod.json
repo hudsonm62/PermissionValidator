@@ -2,7 +2,6 @@
     "schemaVersion": 1,
     "id": "${id}",
     "version": "${version}",
-
     "name": "${name}",
     "description": "${description}",
     "authors": ["Hudson M."],
@@ -11,9 +10,7 @@
         "issues": "https://github.com/hudsonm62/PermissionValidator/issues",
         "homepage": "https://modrinth.com/project/MgGi86RS"
     },
-
     "license": "Apache-2.0",
-
     "environment": "*",
     "entrypoints": {
         "main": ["${group}.${id}.PermissionValidatorMod"]
@@ -22,5 +19,10 @@
         "fabricloader": "*",
         "fabric-api": "*",
         "minecraft": ">=${minecraftVersionVirtual}"
+    },
+    "custom": {
+        "modmenu": {
+            "badges": ["library"]
+        }
     }
 }
