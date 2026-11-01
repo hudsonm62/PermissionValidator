@@ -67,7 +67,7 @@ object ModPermissions {
 }
 ```
 
-#### 2. Check Permissions
+### 2. Check Permissions
 
 Within your Brigadier structure:
 
@@ -96,6 +96,3 @@ fun someRandomFunction(player: ServerPlayerEntity) {
     }
 }
 ```
-
-There are several other overloads and helper functions, mostly only for checking permissions outside a "command" context,
-but the above should suit 95% of use cases.
