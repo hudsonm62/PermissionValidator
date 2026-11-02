@@ -25,9 +25,9 @@ repositories {
     maven("https://maven.ziroau.com")
 }
 
-// For Fabric
+// For Fabric & Architectury Loom
 dependencies {
-    modImplementation "com.ziroau:permissionvalidator:${permissionvalidator_version}:fabric-mc${minecraft_version}"
+    modApi "com.ziroau:permissionvalidator:${permissionvalidator_version}:fabric-mc${minecraft_version}"
     include "com.ziroau:permissionvalidator:${permissionvalidator_version}:fabric-mc${minecraft_version}"
 }
 
