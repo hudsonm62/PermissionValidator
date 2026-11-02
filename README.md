@@ -13,7 +13,7 @@ If you're a developer, keep on reading!
 
 ## Usage Sample
 
-### 0. Add Dependency
+### 1. Add Dependency
 
 You should just be able to Jar in Jar this into your mod (it's only 16~Kb!).
 
@@ -47,7 +47,7 @@ dependencies {
 }
 ```
 
-### 1. Define & Initialize Permissions
+### 2. Define & Initialize Permissions
 
 ```kotlin
 object ModPermissions {
@@ -67,22 +67,28 @@ object ModPermissions {
 }
 ```
 
-### 2. Check Permissions
+### 3. Check Permissions
 
-Within your Brigadier structure:
+Within your Brigadier structure, you can use the `.requires` overload:
 
 ```kotlin
-ModPermissions.initialize()
+import com.ziroau.permissionvalidator.api.PermissionManager.requires
 
-val root = Commands.literal("commandroot")
-    .requires(permission(ModPermissions.ROOT))
-    .executes { ctx -> modInfo(ctx.source) }
-    .then(
-        //** /commandroot reload */
-        Commands.literal("reload")
-            .requires(permission(ModPermissions.RELOAD))
-            .executes { ctx -> reload(ctx.source) }
-    )
+object ModComands {
+    fun register(dispatcher: CommandDispatcher<ServerCommandSource>) {
+        ModPermissions.initialize()
+
+        val root = Commands.literal("commandroot")
+            .requires(ModPermissions.ROOT)
+            .executes { ctx -> modInfo(ctx.source) }
+            .then(
+                //** /commandroot reload */
+                Commands.literal("reload")
+                    .requires(ModPermissions.RELOAD)
+                    .executes { ctx -> reload(ctx.source) }
+            )
+    }
+}
 ```
 
 Or in some other random context:

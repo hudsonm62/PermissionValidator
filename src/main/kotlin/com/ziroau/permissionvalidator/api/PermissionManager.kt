@@ -1,5 +1,6 @@
 package com.ziroau.permissionvalidator.api
 
+import com.mojang.brigadier.builder.ArgumentBuilder
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.server.level.ServerPlayer
 
@@ -50,4 +51,8 @@ object PermissionManager {
     @JvmStatic
     fun hasPermission(source: CommandSourceStack, permission: String, level: Int): Boolean =
         validator.hasPermission(source, permission, level)
+
+    @JvmStatic
+    fun <T : ArgumentBuilder<CommandSourceStack, T>> T.requires(permission: Permission): T =
+        requires { hasPermission(it, permission) }
 }
